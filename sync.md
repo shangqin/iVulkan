@@ -1,31 +1,65 @@
-# Vulkan多线程
+# 同步
 
-[TOC]
+## 资料
 
-## Multi-Threading in Vulkan
+1. [Synchronization Examples](https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples)
+   1. Khronos官方提供的同步相关的example
+2. [Frames in Flight](https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation)
+   1. 介绍了多帧并发处理中，如何使用Semaphore和Fence进行同步
+   2. 具体代码：https://github.com/Overv/VulkanTutorial/blob/master/code/15_hello_triangle.cpp
+3. [Yet another blog explaining Vulkan synchronization](http://themaister.net/blog/2019/08/14/yet-another-blog-explaining-vulkan-synchronization/)
 
-https://community.arm.com/developer/tools-software/graphics/b/blog/posts/multi-threading-in-vulkan
+## 同步
 
-### 同步
-
-![](https://community.arm.com/cfs-file/__key/communityserver-blogs-components-weblogfiles/00-00-00-20-66/8321.blog_5F00_diagrams.png)
-
-* Semaphores - used to synchronize work across queues or across coarse-grained submissions to a single queue
-* Events and barriers - used to synchronize work within a command buffer or a sequence of command buffers submitted to a single queue
-* Fences - used to synchronize work between the device and the host
-
-### 多线程
-
-![](https://community.arm.com/cfs-file/__key/communityserver-blogs-components-weblogfiles/00-00-00-20-66/5277.swap2.png)
-
-## Multiple frames in flight
-
-https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
-
-https://vulkan-tutorial.com/code/15_hello_triangle.cpp
+1. Fence
+2. Semaphore
+3. Event
+4. Pipeline Barrier
+5. Render Pass
 
 
-```
+
+## Fence
+
+用于CPU和GPU之间的同步，
+
+## Semaphore
+
+## Event
+
+## Pipeline Stage
+
+## Access Type
+
+## Pipeline Barrier
+
+
+
+## Render Pass
+
+
+
+## 多帧并发处理
+
+下面的例子，同时并发**2帧**。
+
+**为什么需要同步？**
+
+1. 命令是按照顺序执行，但是命令返回时，**该命令不一定执行完**
+2. 下一条命令开始时，需要等待上一条命令执行完
+
+
+
+每一帧都有自己独立的Semaphore和Fence，其中：
+
+1. `Semaphore`用于**GPU和GPU间同步**，主要用于Queue中命令之间同步
+2. `Fence`用于**CPU和GPU间同步**，主要用于通知CPU，submit的command buffer已经执行完毕
+3. `imageAvailableSemaphores`：``vkAcquireNextImageKHR获取到image之后，该信号量为**有信号**状态，`vkQueueSubmit`等待该信号量
+4. `renderFinishedSemaphores`：`vkQueueSubmit`**对应的command buffer执行完**之后，该信号量为**有信号**状态，`vkQueuePresentKHR`等待该信号量
+5. `inFlightFences`：`vkQueueSubmit`中**所有的command buffer都执行完**之后，该fence为有信号状态，用于CPU侧和GPU侧同步
+6. `imagesInFlight`
+
+```c++
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
 std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -55,7 +89,11 @@ void createSyncObjects() {
         }
     }
 }
+```
 
+
+
+```cpp
 void drawFrame() {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -105,6 +143,5 @@ void drawFrame() {
 
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
-
-
 ```
+
