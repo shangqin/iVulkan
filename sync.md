@@ -33,6 +33,19 @@
 
 ## Pipeline Barrier
 
+参考：https://gpuopen.com/vulkan-barriers-explained/
+
+
+
+**Example 1: a slow barrier, specifying the bottom of the pipe as the source stage and the top of pipe as the target stage.**
+
+![A slow barrier, specifying the bottom of the pipe as the source stage and the top of pipe as the target stage. This will wait for everything to finish and block any work from starting.](./pictures/sync/vulkan-slow-barrier-1024x771.png)
+
+
+
+**Example 2: the optimal barrier which allows all green pipeline stages to execute.**
+
+![A slow barrier, specifying the bottom of the pipe as the source stage and the top of pipe as the target stage. This will wait for everything to finish and block any work from starting.](./pictures/sync/vulkan-good-barrier-1024x771.png)
 
 
 ## Render Pass
