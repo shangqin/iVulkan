@@ -2,12 +2,13 @@
 
 ## 资料
 
-1. [Synchronization Examples](https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples)
+1. https://github.com/KhronosGroup/Vulkan-Guide/blob/master/chapters/synchronization.md
+2. [Synchronization Examples](https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples)
    1. Khronos官方提供的同步相关的example
-2. [Frames in Flight](https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation)
+3. [Frames in Flight](https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation)
    1. 介绍了多帧并发处理中，如何使用Semaphore和Fence进行同步
    2. 具体代码：https://github.com/Overv/VulkanTutorial/blob/master/code/15_hello_triangle.cpp
-3. [Yet another blog explaining Vulkan synchronization](http://themaister.net/blog/2019/08/14/yet-another-blog-explaining-vulkan-synchronization/)
+4. [Yet another blog explaining Vulkan synchronization](http://themaister.net/blog/2019/08/14/yet-another-blog-explaining-vulkan-synchronization/)
 
 ## 同步
 
@@ -15,17 +16,37 @@
 2. Semaphore
 3. Event
 4. Pipeline Barrier
-5. Render Pass
+5. Subpass Dependency
+6. WaitIdle
 
+![synchronization_overview.png](pictures/sync/synchronization_overview.png)
 
+![image-20200130115548679](pictures/sync/image-20200130115548679.png)
 
 ## Fence
 
-用于CPU和GPU之间的同步，
+### 用途
+
+用于CPU和GPU之间的同步
 
 ## Semaphore
 
+### 用途
+
+1. 用于GPU和GPU之间的同步
+2. 用于同一个queue内部或者不同queue之间
+
 ## Event
+
+### 用途
+
+1. 细粒度的同步原语
+2. 同一个queue中的command之间同步
+3. CPU和queue之间同步
+
+
+
+![image-20200130120546335](pictures/sync/image-20200130120546335.png)
 
 ## Pipeline Stage
 
@@ -33,9 +54,16 @@
 
 ## Pipeline Barrier
 
+### 用途
+
+1. 同一个queue中的command之间同步
+2. 同一个subpass中的command之间同步
+
+![synchronization_pipeline_barrieres](pictures/sync/synchronization_pipeline_barrieres.png)
+
+
+
 参考：https://gpuopen.com/vulkan-barriers-explained/
-
-
 
 **Example 1: a slow barrier, specifying the bottom of the pipe as the source stage and the top of pipe as the target stage.**
 
