@@ -21,13 +21,88 @@
 
 ![synchronization_overview.png](pictures/sync/synchronization_overview.png)
 
-![image-20200130115548679](pictures/sync/image-20200130115548679.png)
+<img src="pictures/sync/image-20200130115548679.png" alt="image-20200130115548679" style="zoom:50%;" />
 
 ## Fence
 
 ### 用途
 
-用于CPU和GPU之间的同步
+1. 用于CPU和GPU之间的同步
+2. 主要用在通知CPU，command buffer执行完毕
+
+### API
+
+#### 创建Fence
+
+**注意**：fence的flags如果不指定，创建的fence是**没有信号状态**。如果设置为`VK_FENCE_CREATE_SIGNALED_BIT`，则创建的fence是**有信号状态**。
+
+```cpp
+VkResult vkCreateFence(
+    VkDevice                                    device,
+    const VkFenceCreateInfo*                    pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkFence*                                    pFence);
+
+typedef struct VkFenceCreateInfo {
+    VkStructureType       sType;
+    const void*           pNext;
+    VkFenceCreateFlags    flags;
+} VkFenceCreateInfo;
+
+typedef enum VkFenceCreateFlagBits {
+    VK_FENCE_CREATE_SIGNALED_BIT = 0x00000001,
+    VK_FENCE_CREATE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
+} VkFenceCreateFlagBits;
+```
+
+#### 销毁Fence
+
+```cpp
+void vkDestroyFence(
+    VkDevice                                    device,
+    VkFence                                     fence,
+    const VkAllocationCallbacks*                pAllocator);
+```
+
+#### 重置Fence为无信号状态
+
+```cpp
+VkResult vkResetFences(
+    VkDevice                                    device,
+    uint32_t                                    fenceCount,
+    const VkFence*                              pFences);
+```
+
+#### 获取Fence状态
+
+成功时，
+
+1. 返回VK_SUCCESS，表示fence是有信号状态
+2. 返回VK_NOT_READY，表示fence是无信号状态
+
+```cpp
+VkResult vkGetFenceStatus(
+    VkDevice                                    device,
+    VkFence                                     fence);
+```
+
+#### 等待Fence变为有信号状态
+
+1. 阻塞操作
+2. waitAll为TRUE时，所有fence都变为有信号状态，才返回。如果为FALSE，有1个fence变为有信号状态就返回。
+3. timeout为0时，不等待直接返回，返回当前的状态。如果返回VK_TIMEOUT，表示当前的条件还不满足。
+4. 如果timeout到了，条件还不满足，返回VK_TIMEOUT。如果条件满足，返回VK_SUCCESS。
+
+```cpp
+VkResult vkWaitForFences(
+    VkDevice                                    device,
+    uint32_t                                    fenceCount,
+    const VkFence*                              pFences,
+    VkBool32                                    waitAll,
+    uint64_t                                    timeout);
+```
+
+
 
 ## Semaphore
 
@@ -36,13 +111,34 @@
 1. 用于GPU和GPU之间的同步
 2. 用于同一个queue内部或者不同queue之间
 
+### API
+
+创建Semaphore
+
+销毁Semaphore
+
+```cpp
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateSemaphore(
+    VkDevice                                    device,
+    const VkSemaphoreCreateInfo*                pCreateInfo,
+    const VkAllocationCallbacks*                pAllocator,
+    VkSemaphore*                                pSemaphore);
+
+VKAPI_ATTR void VKAPI_CALL vkDestroySemaphore(
+    VkDevice                                    device,
+    VkSemaphore                                 semaphore,
+    const VkAllocationCallbacks*                pAllocator);
+```
+
+
+
 ## Event
 
 ### 用途
 
 1. 细粒度的同步原语
 2. 同一个queue中的command之间同步
-3. CPU和queue之间同步
+3. CPU和GPU之间同步，用于CPU和queue之间
 
 
 
@@ -185,4 +281,10 @@ void drawFrame() {
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 ```
+
+## Wait Idle
+
+vkQueueWaitIdle：等待queue所有操作完成
+
+vkDeviceWaitIdle：等待device上所有的queue的所有操作完成
 
